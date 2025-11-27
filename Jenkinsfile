@@ -55,7 +55,6 @@ pipeline {
            3. SONARQUBE BACKEND
         ======================================================== */
 
-        stage('Analyse SonarQube Backend') {
 
         stage('Analyse SonarQube Backend') {
 
@@ -91,7 +90,7 @@ pipeline {
            4. SONARQUBE FRONTEND
         ======================================================== */
 
-        stage('Analyse SonarQube Frontend') {
+
 
         stage('Analyse SonarQube Frontend') {
 
