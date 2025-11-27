@@ -99,7 +99,7 @@ pipeline {
                     script {
 
                         withSonarQubeEnv('SonarQube') {
-                            withCredentials([string(credentialsId: 'sonar-tokens', variable: 'SONAR_AUTH_TOKEN')]) {
+                            withCredentials([string(credentialsId: 'sonar001', variable: 'SONAR_AUTH_TOKEN')]) {
 
                                 def scannerHome = tool name: 'SonarQubeScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 
