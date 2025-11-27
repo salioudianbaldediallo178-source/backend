@@ -4,12 +4,14 @@ pipeline {
         label 'agent-windows'
     }
 
-   /*  tools {
+     tools {
         maven 'Maven-3.9.6'
-    } */
+        }
+
+
 
     environment {
-        // DockerHub
+        // DockerHubvfgsd
         DOCKERHUB_USER = "encvr1"
         BACKEND_IMAGE  = "${DOCKERHUB_USER}/backend-courrier"
         FRONTEND_IMAGE = "${DOCKERHUB_USER}/frontend-courrier"
@@ -17,7 +19,7 @@ pipeline {
         FRONTEND_TAG   = "1.${BUILD_NUMBER}"
 
         // Frontend GitHub
-        FRONTEND_REPO_URL     = 'https://github.com/salioudianbaldediallo178-source/frontend.git'
+        FRONTEND_REPO_URL     = 'https://github.com/Leuziii/frontend-courrier-physique.git'
         FRONTEND_REPO_BRANCH  = 'master'
         FRONTEND_CREDENTIALS  = 'credential-id-github'
     }
@@ -48,6 +50,85 @@ pipeline {
             }
         }
 
+
+        /* =======================================================
+           3. SONARQUBE BACKEND
+        ======================================================== */
+
+        stage('Analyse SonarQube Backend') {
+
+        stage('Analyse SonarQube Backend') {
+
+            steps {
+                dir('backend') {
+                    script {
+                        withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonar001', variable: 'SONAR_AUTH_TOKEN')]) {
+
+                                bat """
+                                    mvn clean verify -DskipTests sonar:sonar ^
+                                        -Dsonar.projectKey=analyse-code-backend ^
+                                        -Dsonar.projectName="analyse-code-backend" ^
+                                        -Dsonar.host.url=http://localhost:9000 ^
+                                        -Dsonar.token=%SONAR_AUTH_TOKEN%
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+       /*  stage('Quality Gate Backend') {
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        } */
+
+        /* =======================================================
+           4. SONARQUBE FRONTEND
+        ======================================================== */
+
+        stage('Analyse SonarQube Frontend') {
+
+        stage('Analyse SonarQube Frontend') {
+
+            steps {
+                dir('frontend') {
+                    script {
+
+                        withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonar-tokens', variable: 'SONAR_AUTH_TOKEN')]) {
+
+                                def scannerHome = tool name: 'SonarQubeScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+
+                                bat """
+                                    "${scannerHome}\\bin\\sonar-scanner.bat" ^
+                                        -Dsonar.projectKey=analyse-code-frontend ^
+                                        -Dsonar.projectName="analyse-code-frontend" ^
+                                        -Dsonar.sources=src ^
+                                        -Dsonar.host.url=http://localhost:9000 ^
+                                        -Dsonar.token=%SONAR_AUTH_TOKEN%
+                                """
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }
+
+
+        /* stage('Quality Gate Frontend') {
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        } */
 
 
         /* =======================================================
@@ -82,7 +163,7 @@ pipeline {
 
     post {
         success {
-            echo "🚀 Déploiement réussi !"
+            echo "🚀 Déploiement réussii !"
         }
         failure {
             echo "❌ Le pipeline a échoué, vérifie les logs Jenkins."
