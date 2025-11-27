@@ -120,6 +120,73 @@ pipeline {
 
         }
 
+        // 🔹 OWASP Dependency-Check Backend (scan Maven dependency)
+        stage('OWASP Dependency-Check Backend') {
+            steps {
+                dir('backend') {
+                    script {
+                        // 🔹 Récupère le chemin de Dependency-Check (configuré dans Global Tool Configuration)
+                        def depCheckHome = tool(
+                            name: 'Owasp-Dependency-Check',
+                            type: 'org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation'
+                        )
+
+                        bat """
+                        if not exist reports mkdir reports
+                        "${depCheckHome}\\bin\\dependency-check.bat" ^
+                            --scan . ^
+                            --format HTML --format XML ^
+                            --out reports
+                        """
+                    }
+                }
+            }
+            post {
+                always {
+                    // 🔹 Publie le XML pour le dashboard Jenkins
+                    dependencyCheckPublisher pattern: 'backend/reports/dependency-check-report.xml'
+
+                    // 🔹 Archive le HTML comme artefact téléchargeable
+                    archiveArtifacts artifacts: 'backend/reports/dependency-check-report.html', fingerprint: true
+                }
+            }
+        }
+
+
+
+        // 🔹 OWASP Dependency-Check Frontend (scan NPM dependency)
+        stage('OWASP Dependency-Check Frontend') {
+            steps {
+                dir('frontend') {
+                    script {
+                        def depCheckHome = tool(
+                            name: 'Owasp-Dependency-Check',
+                            type: 'org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation'
+                        )
+
+                        bat """
+                        if not exist reports mkdir reports
+                        "${depCheckHome}\\bin\\dependency-check.bat" ^
+                            --scan . ^
+                            --disableAssembly ^
+                            --disableYarnAudit ^
+                            --format HTML --format XML ^
+                            --out reports
+                        """
+                    }
+                }
+            }
+            post {
+                always {
+                    // 🔹 Publie le XML pour le dashboard Jenkins
+                    dependencyCheckPublisher pattern: 'frontend/reports/dependency-check-report.xml'
+
+                    // 🔹 Archive le HTML comme artefact téléchargeable
+                    archiveArtifacts artifacts: 'frontend/reports/dependency-check-report.html', fingerprint: true
+                }
+            }
+        }
+
 
         /* stage('Quality Gate Frontend') {
             steps {
