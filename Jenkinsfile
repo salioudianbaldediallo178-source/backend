@@ -188,6 +188,36 @@ pipeline {
         }
 
 
+
+
+
+        /* stage('Quality Gate Frontend') {
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        } */
+
+
+        /* =======================================================
+           5. DOCKER BUILDS
+        ======================================================== */
+        stage('Build Backend Docker Image') {
+            steps {
+                dir('backend') {
+                    bat "docker build -t %BACKEND_IMAGE%:%BACKEND_TAG% ."
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                dir('frontend') {
+                    bat "docker build -t %FRONTEND_IMAGE%:%FRONTEND_TAG% ."
+                }
+            }
+        }
 // Scan Backend image
 stage('Trivy - Scan Backend') {
     steps {
@@ -247,7 +277,6 @@ stage('Trivy - Scan Backend') {
         }
     }
 }
-
 
 
 // Scan Frontend image
@@ -311,34 +340,6 @@ stage('Trivy - Scan Frontend') {
         }
     }
 }
-        /* stage('Quality Gate Frontend') {
-            steps {
-                timeout(time: 30, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        } */
-
-
-        /* =======================================================
-           5. DOCKER BUILDS
-        ======================================================== */
-        stage('Build Backend Docker Image') {
-            steps {
-                dir('backend') {
-                    bat "docker build -t %BACKEND_IMAGE%:%BACKEND_TAG% ."
-                }
-            }
-        }
-
-        stage('Build Frontend Docker Image') {
-            steps {
-                dir('frontend') {
-                    bat "docker build -t %FRONTEND_IMAGE%:%FRONTEND_TAG% ."
-                }
-            }
-        }
-
         /* =======================================================
            6. DEPLOY DOCKER COMPOSE
         ======================================================== */
